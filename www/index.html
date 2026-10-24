@@ -38,6 +38,14 @@ details{margin-top:10px;color:var(--mu);font-size:14px}summary{cursor:pointer;co
 #st1{font-weight:600}#st2{color:var(--mu)}#st2::before{content:' · '}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 .mixchip{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}.mixchip .pre{border:0}.mixchip .x{border:0;background:none;color:var(--mu);padding:0 14px 0 4px;font-size:18px;cursor:pointer}.pre.add{border-style:dashed;color:var(--mu)}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.swc{position:relative;display:inline-block;width:44px;height:24px;flex:none}
+.swc input{opacity:0;width:0;height:0;position:absolute}
+.sld{position:absolute;cursor:pointer;inset:0;background-color:var(--line);transition:.2s;border-radius:24px}
+.sld:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:#ebe8f4;transition:.2s;border-radius:50%}
+input:checked + .sld{background-color:var(--ac)}
+input:checked + .sld:before{transform:translateX(20px);background-color:#12141a}
+.subcfg{display:grid;gap:8px;padding:6px 0 6px 12px;border-left:2px solid var(--line);margin:2px 0 6px}
 </style></head><body>
 <h1>Auralis</h1><div class="presets" id="mixes"></div>
 
@@ -68,24 +76,35 @@ details{margin-top:10px;color:var(--mu);font-size:14px}summary{cursor:pointer;co
   <div class="f"><span>Start bell</span><select id="bs"></select></div>
   <div class="f"><span>Interval bell</span><select id="bm"></select></div>
   <div class="f"><span>Ring every (min, 0 = off)</span><input type="number" id="mint" min="0" value="0" inputmode="numeric"></div>
+  <div class="f"><span>Interval haptic</span><select id="mhi"><option value="off">Off</option><option value="light">Gentle pulse</option><option value="double" selected>Double pulse</option><option value="triple">Triple pulse</option><option value="long">Long pulse</option></select></div>
   <div class="f"><span>Finish bell</span><select id="bf"></select></div>
   <div class="mu" style="margin-top:4px">Volumes</div>
   <div class="vl"><span style="width:96px">Start bell</span><input type="range" id="vs" min="0" max="1" step="0.01" value="0.8"></div>
   <div class="vl"><span style="width:96px">Interval bell</span><input type="range" id="vi" min="0" max="1" step="0.01" value="0.8"></div>
   <div class="vl"><span style="width:96px">Finish bell</span><input type="range" id="vf" min="0" max="1" step="0.01" value="0.8"></div>
-  <div class="vl cue"><span style="width:96px">Breath cue</span><input type="range" id="vc" min="0" max="1" step="0.01" value="0.5"></div>
-  <div class="f"><span>Breathing guide</span><select id="bgm"><option value="off">Off</option><option value="v">Visual</option><option value="s">Sound</option><option value="b">Visual + sound</option></select></div>
-  <div class="f cue"><span>Cue sound</span><select id="bcs"><option value="swell">Soft breath swell</option><option value="bell">Bell</option><option value="vib">Vibration (Android)</option></select></div>
-  <div class="f cue cb"><span>In-breath bell</span><select id="bci"></select></div>
-  <div class="f cue cb"><span>Out-breath bell</span><select id="bco"></select></div>
-  <div class="f brt"><span>Technique</span><select id="btech"><option value="calm">Calm 4-6</option><option value="box">Box 4-4-4-4</option><option value="478">4-7-8</option><option value="coh">Coherent 5-5</option><option value="long">Long exhale 4-8</option><option value="custom">Custom</option></select></div>
-  <div class="brt"><div class="mu" style="margin-bottom:6px">Seconds: in · hold · out · hold</div><div class="f"><input type="number" id="bi" min="1" value="4" inputmode="numeric"><input type="number" id="bh1" min="0" value="0" inputmode="numeric"><input type="number" id="bo" min="1" value="6" inputmode="numeric"><input type="number" id="bh2" min="0" value="0" inputmode="numeric"></div></div>
+  <div class="trow" style="margin-top:4px"><b>Breathing guide</b><label class="swc"><input type="checkbox" id="bg_on"><span class="sld"></span></label></div>
+  <div id="bg_panel" style="display:grid;gap:8px" hidden>
+    <div class="trow"><span>👁 Visual guide</span><label class="swc"><input type="checkbox" id="bg_vis"><span class="sld"></span></label></div>
+    <div class="trow"><span>🔊 Sound cues</span><label class="swc"><input type="checkbox" id="bg_snd"><span class="sld"></span></label></div>
+    <div id="bg_snd_cfg" class="subcfg" hidden>
+      <div class="vl"><span style="width:96px">Breath cue</span><input type="range" id="vc" min="0" max="1" step="0.01" value="0.5"></div>
+      <div class="f"><span>Cue sound</span><select id="bcs"><option value="swell">Soft breath swell</option><option value="bell">Bell</option></select></div>
+      <div class="f cb"><span>In-breath bell</span><select id="bci"></select></div>
+      <div class="f cb"><span>Out-breath bell</span><select id="bco"></select></div>
+    </div>
+    <div class="trow"><span>📳 Haptic vibration</span><label class="swc"><input type="checkbox" id="bg_hap"><span class="sld"></span></label></div>
+    <div id="bg_hap_cfg" class="subcfg" hidden>
+      <div class="f"><span>Breathing haptic</span><select id="bgh"><option value="cues">In &amp; out cues</option><option value="all">Every phase (with hold)</option><option value="pulse">Double pulse on cue</option></select></div>
+    </div>
+    <div class="f brt"><span>Technique</span><select id="btech"><option value="calm">Calm 4-6</option><option value="box">Box 4-4-4-4</option><option value="478">4-7-8</option><option value="coh">Coherent 5-5</option><option value="long">Long exhale 4-8</option><option value="custom">Custom</option></select></div>
+    <div class="brt"><div class="mu" style="margin-bottom:6px">Seconds: in · hold · out · hold</div><div class="f"><input type="number" id="bi" min="1" value="4" inputmode="numeric"><input type="number" id="bh1" min="0" value="0" inputmode="numeric"><input type="number" id="bo" min="1" value="6" inputmode="numeric"><input type="number" id="bh2" min="0" value="0" inputmode="numeric"></div></div>
+  </div>
   <button class="pre" id="bshow" hidden>Show breathing circle</button>
   <button class="pre" id="mgo" style="background:var(--ac);color:#241a08;border-color:var(--ac);font-weight:600">Start session</button>
 </div></div></div>
 <div class="st" id="stbtn" role="button" tabindex="0" aria-label="Show playing sounds"><span id="st1">Nothing selected</span><span id="st2">Timer off</span></div>
 <div class="prow"><button class="pb" id="bsave" aria-label="Save mix">💾</button><button class="pb" id="btimer" aria-label="Sleep timer">⏱</button><button id="play" aria-label="Play"><svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><path d="M8.5 5.5v13l10-6.5z" transform="translate(-1.1 0)"/></svg></button><button class="pb" id="bmed" aria-label="Meditation session">🧘</button><button class="pb" id="bdark" aria-label="Dark screen">🌓</button></div></div>
-<audio id="out"></audio>
+<audio id="out" playsinline preload="auto"></audio>
 <div id="breath" hidden><button id="bx" aria-label="Close breathing guide">✕</button><div id="bc"></div><div id="bt"></div></div>
 <div id="dark" hidden><span>Tap anywhere to wake</span></div>
 <script>
@@ -128,12 +147,11 @@ for(const [g,id,name,ic,sub] of OTHER){
   t.querySelector('.head').onclick=()=>{sel.has(id)?sel.delete(id):sel.add(id);sync(id);applyAny(id);if(id==='thunder'&&sel.has(id)&&playing)setTimeout(boom,800);if(id==='bowl'&&sel.has(id)&&playing)setTimeout(()=>ring('bowl',nodes.bowl,opt.bowl),500)};
   $('g_'+g).append(t);
 }
-function sync(id){
-  const t=$('t_'+id);t.classList.toggle('on',isOn(id));
+function sync(id,skipAuto=false){
+  const t=$('t_'+id);if(!t)return;t.classList.toggle('on',isOn(id));
   if(CK.includes(id))t.querySelectorAll('.var').forEach((b,i)=>b.classList.toggle('on',cv[id]===i));
   else t.querySelector('.head').setAttribute('aria-pressed',sel.has(id));
-  if(lastP){lastP=null;renderMixes()}
-  show();autoState();
+  show();if(!skipAuto)autoState();
 }
 // "Now playing" panel: a slider (and options) for every selected sound
 let nowSig='';
@@ -169,7 +187,8 @@ function loadMix(p){
 }
 for(const [n,p] of Object.entries(PRESETS)){const b=document.createElement('button');b.className='pre';b.textContent=n;b.onclick=()=>loadMix(p);$('pre').append(b)}
 // my mixes (kept in this browser)
-function snapshot(inclMed){const p={c:{},l:{},o:{bin:opt.bin,iso:opt.iso,tone:opt.tone,bowl:opt.bowl,bowlEvery:opt.bowlEvery},m:mvol,w:warm};CK.forEach(c=>{if(cv[c]>=0)p.c[c]=[cv[c],lvl[c]]});sel.forEach(id=>p.l[id]=lvl[id]);p.d=drift;if(inclMed){p.md={};MEDIDS.forEach(id=>p.md[id]=$(id).value);p.md.vv={...vvol}}return p}
+const BG_CHECKS=['bg_on','bg_vis','bg_snd','bg_hap'];
+function snapshot(inclMed){const p={c:{},l:{},o:{bin:opt.bin,iso:opt.iso,tone:opt.tone,bowl:opt.bowl,bowlEvery:opt.bowlEvery},m:mvol,w:warm};CK.forEach(c=>{if(cv[c]>=0)p.c[c]=[cv[c],lvl[c]]});sel.forEach(id=>p.l[id]=lvl[id]);p.d=drift;if(inclMed){p.md={};MEDIDS.forEach(id=>p.md[id]=$(id).value);BG_CHECKS.forEach(id=>p.md[id]=$(id).checked);p.md.vv={...vvol}}return p}
 const hasSnd=p=>p&&(Object.keys(p.c||{}).length||Object.keys(p.l||{}).length);
 let lastJ='';function keepLast(){const p=snapshot();if(!hasSnd(p))return;const j=JSON.stringify(p);if(j!==lastJ){lastJ=j;try{localStorage.setItem('last',j)}catch(e){}}}
 let lastP=null;try{lastP=JSON.parse(localStorage.getItem('last')||'null')}catch(e){}if(!hasSnd(lastP))lastP=null;
@@ -179,11 +198,22 @@ const saveMixes=()=>{try{localStorage.setItem('mixes',JSON.stringify(mixes))}cat
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 function renderMixes(){
   const box=$('mixes');box.innerHTML='';
-  if(lastP){const r=document.createElement('button');r.className='pre add';r.textContent='▶ Resume last mix';r.onclick=()=>{const p=lastP;lastP=null;renderMixes();loadMix(p)};box.append(r)}
   mixes.forEach((m,i)=>{const w=document.createElement('span');w.className='mixchip';w.innerHTML='<button class="pre"></button><button class="x" aria-label="Delete mix">×</button>';
     w.firstChild.textContent=m.e+' '+m.n+(m.p.md?' 🧘':'');w.firstChild.onclick=()=>loadMix(m.p);
     w.lastChild.onclick=()=>{if(confirm('Delete "'+m.n+'"?')){mixes.splice(i,1);saveMixes();renderMixes()}};box.append(w)});
   box.hidden=!box.children.length;
+}
+function preselectLast(){
+  if(!lastP||!hasSnd(lastP))return;
+  const p=lastP;
+  if(p.w!=null)setWarm(p.w);
+  if(p.d!=null){drift=!!p.d;$('drift').checked=drift;if(!drift)for(const k in dmul)delete dmul[k]}
+  if(p.md)applyMed(p.md);
+  if(p.m!=null){mvol=p.m;$('mvs').value=mvol;$('mv').textContent=Math.round(mvol*100)}
+  CK.forEach(c=>cv[c]=-1);sel.clear();Object.assign(opt,p.o||{});
+  for(const c in p.c||{}){cv[c]=p.c[c][0];lvl[c]=p.c[c][1]}for(const id in p.l||{})if(ALL.includes(id)){sel.add(id);lvl[id]=p.l[id]}
+  nowSig='';ALL.forEach(id=>sync(id,true));applyOpt();
+  show();
 }
 for(const e of ['🌙','😴','💤','🌧','⛈','🔥','🌊','🌲','☁️','🧘','🎧','🌌','🧠','🪷','☕','📖']){const b=document.createElement('button');b.className='pre'+(e===emo?' on':'');b.textContent=e;
   b.onclick=()=>{emo=e;document.querySelectorAll('#emojis .pre').forEach(x=>x.classList.toggle('on',x===b))};$('emojis').append(b)}
@@ -291,7 +321,7 @@ function init(){
   const cl=ac.createGain(),cls=ac.createGain();cl.gain.value=.5;cls.gain.value=.25;osci(.07).connect(cls).connect(cl.gain);loop(bufs.pk).connect(filt('lowpass',420)).connect(cl).connect(nodes.cave);
   const wm=ac.createGain();wm.gain.value=1.1;loop(bufs.bn).connect(filt('lowpass',280)).connect(wm).connect(nodes.womb);
   crackle();thunderLoop();bowlLoop();stream();extras();
-  if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:'Auralis'});navigator.mediaSession.setActionHandler('pause',pause);navigator.mediaSession.setActionHandler('play',play)}
+  setupMediaSession();updateMediaSession();
 }
 // stream bubbles: short rising sine blips, scheduled ahead
 let bubNext=0;
@@ -397,12 +427,37 @@ function cueNode(){if(!cueG){cueG=ac.createGain();cueG.gain.value=vvol.c*.8;cueG
 let cueG,ph=null,cyc=[];
 try{Object.assign(vvol,JSON.parse(localStorage.getItem('vvol')||'{}'))}catch(e){} // meditation volumes are remembered
 for(const [id,k] of [['vs','s'],['vi','i'],['vf','f'],['vc','c']])$(id).value=vvol[k]; // ph = current phase {t,S,from,to,t0}
+const HAPTICS={
+  light:[120],double:[100,80,100],triple:[80,60,80,60,80],long:[350],
+  inhale_cues:[80],inhale_pulse:[60,50,60],
+  exhale_cues:[140],exhale_pulse:[70,50,110],
+  hold:[35],session_end:[120,90,120,90,260]
+};
+function triggerHaptic(k){
+  const pat=typeof k==='string'?HAPTICS[k]:k;
+  if(!pat)return;
+  try{
+    const H=window.Capacitor?.Plugins?.Haptics;
+    if(H){
+      if(Array.isArray(pat)){
+        let d=0;pat.forEach((dur,i)=>{if(i%2===0)setTimeout(()=>{H.vibrate({duration:dur}).catch(()=>{})},d);d+=dur});
+      }else if(typeof pat==='number'){H.vibrate({duration:pat}).catch(()=>{})}
+      return;
+    }
+  }catch(e){}
+  try{if(navigator.vibrate)navigator.vibrate(pat)}catch(e){}
+}
+function breathHaptic(cue){
+  const ht=$('bgh').value;
+  if(cue===1)triggerHaptic(ht==='pulse'?'inhale_pulse':'inhale_cues');
+  else if(cue===2)triggerHaptic(ht==='pulse'?'exhale_pulse':'exhale_cues');
+  else if(cue===0&&ht==='all')triggerHaptic('hold');
+}
 function swell(inh,S){const t=ac.currentTime,n=loop(bufs.pk),f=filt('lowpass',inh?300:1100,.7),g=ac.createGain();
   f.frequency.setValueAtTime(inh?300:1100,t);f.frequency.linearRampToValueAtTime(inh?1100:300,t+S);
   g.gain.setValueAtTime(inh?.001:1.4,t);g.gain.linearRampToValueAtTime(inh?1.4:.001,t+S);
   n.connect(f).connect(g).connect(cueG);n.stop(t+S+.1)}
 function breathCue(inh,S){if(!ac)return;const k=$('bcs').value;
-  if(k==='vib'){if(navigator.vibrate)navigator.vibrate(inh?80:[40,60,40]);return}
   cueNode();
   if(k==='bell')ring($(inh?'bci':'bco').value,cueG,null,.45);else swell(inh,S)}
 function phasesNow(){const v=(id,min)=>Math.max(min,+$(id).value||min);
@@ -418,37 +473,97 @@ function breathStep(i,first){
   if(!playing){setTimeout(()=>breathStep(i,first),500);return}
   if(i===0)cyc=phasesNow();const p=cyc[i];
   ph={...p,t0:Date.now()};drawPhase();
-  const m=$('bgm').value;if(!first&&p.cue&&(m==='s'||m==='b'))breathCue(p.cue===1,p.S);
+  const snd=$('bg_on').checked&&$('bg_snd').checked;
+  const hap=$('bg_on').checked&&$('bg_hap').checked;
+  if(!first){
+    if(p.cue&&snd)breathCue(p.cue===1,p.S);
+    if(hap)breathHaptic(p.cue);
+  }
   setTimeout(()=>breathStep((i+1)%cyc.length),p.S*1000);
 }
 let wl=null;
 async function wakeOn(){try{if(navigator.wakeLock&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}}catch(e){}}
 function wakeOff(){try{wl&&wl.release()}catch(e){}wl=null}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&breathOn&&breathVis)wakeOn()});
-function startBreath(){const m=$('bgm').value;if(m==='off')return;breathOn=true;breathVis=m==='v'||m==='b';$('breath').hidden=!breathVis;if(breathVis)wakeOn();setTimeout(()=>breathStep(0,true),800);syncBreath()}
+function startBreath(){
+  if(!$('bg_on').checked)return;
+  const isVis=$('bg_vis').checked,isSnd=$('bg_snd').checked,isHap=$('bg_hap').checked;
+  if(!isVis&&!isSnd&&!isHap)return;
+  breathOn=true;breathVis=isVis;$('breath').hidden=!breathVis;if(breathVis)wakeOn();setTimeout(()=>breathStep(0,true),800);syncBreath();
+}
 function stopBreath(){breathOn=false;wakeOff();$('breath').hidden=true;syncBreath()}
-function syncCue(){const m=$('bgm').value,snd=m==='s'||m==='b';document.querySelectorAll('.cue').forEach(e=>e.hidden=!snd);document.querySelectorAll('.cb').forEach(e=>e.hidden=!(snd&&$('bcs').value==='bell'));document.querySelectorAll('.brt').forEach(e=>e.hidden=m==='off')}
-if(!navigator.vibrate){const o=$('bcs').querySelector('option[value=vib]');if(o)o.remove()}
-$('bgm').onchange=$('bcs').onchange=syncCue;syncCue();
+function syncCue(){
+  const on=$('bg_on').checked;
+  $('bg_panel').hidden=!on;
+  const snd=on&&$('bg_snd').checked;
+  const hap=on&&$('bg_hap').checked;
+  $('bg_snd_cfg').hidden=!snd;
+  $('bg_hap_cfg').hidden=!hap;
+  document.querySelectorAll('.cb').forEach(e=>e.hidden=!(snd&&$('bcs').value==='bell'));
+}
+$('bg_on').onchange=()=>{if($('bg_on').checked&&!$('bg_vis').checked&&!$('bg_snd').checked&&!$('bg_hap').checked){$('bg_vis').checked=true}syncCue();syncBreath()};
+$('bg_vis').onchange=()=>{syncCue();syncBreath()};
+$('bg_snd').onchange=()=>{syncCue()};
+$('bg_hap').onchange=()=>{syncCue();if($('bg_hap').checked)triggerHaptic('inhale_cues')};
+$('bcs').onchange=syncCue;
+$('mhi').onchange=()=>{const v=$('mhi').value;if(v!=='off')triggerHaptic(v)};
+$('bgh').onchange=()=>{triggerHaptic($('bgh').value==='pulse'?'inhale_pulse':'inhale_cues')};
+syncCue();
 const TECH={calm:[4,0,6,0],box:[4,4,4,4],'478':[4,7,8,0],coh:[5,0,5,0],long:[4,0,8,0]};
 const TI=['bi','bh1','bo','bh2'];
 $('btech').onchange=e=>{const t=TECH[e.target.value];if(t)TI.forEach((id,i)=>$(id).value=t[i])};
 TI.forEach(id=>$(id).oninput=()=>{$('btech').value='custom'});
-function syncBreath(){const m=$('bgm').value;$('bshow').hidden=!(breathOn&&!breathVis&&(m==='v'||m==='b'))}
+function syncBreath(){const canVis=$('bg_on').checked&&$('bg_vis').checked;$('bshow').hidden=!(breathOn&&!breathVis&&canVis)}
 $('bx').onclick=()=>{breathVis=false;$('breath').hidden=true;syncBreath()};
 $('bshow').onclick=()=>{breathVis=true;$('breath').hidden=false;drawPhase();if(openP)sheet(openP);syncBreath()};
 // ---- play / pause / timer ----
 const PLAY_SVG='<svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><path d="M8.5 5.5v13l10-6.5z" transform="translate(-1.1 0)"/></svg>',PAUSE_SVG='<svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5.5" width="3.8" height="13" rx="1"/><rect x="13.7" y="5.5" width="3.8" height="13" rx="1"/></svg>';
 const mins=()=>+$('tmin').value||0;
+function setupMediaSession(){
+  if(!('mediaSession'in navigator))return;
+  try{
+    navigator.mediaSession.setActionHandler('play',()=>{if(!ALL.some(isOn)&&!med.on)return;play()});
+    navigator.mediaSession.setActionHandler('pause',()=>{pause()});
+    navigator.mediaSession.setActionHandler('stop',()=>{pause()});
+  }catch(e){}
+}
+function updateMediaSession(){
+  if(!('mediaSession'in navigator))return;
+  const on=ALL.filter(isOn);
+  let title='Auralis',artist='Soundscapes';
+  if(med.on){
+    title='Auralis · Meditation';
+    const rem=Math.max(0,med.D-medEl()),m=Math.ceil(rem/60000);
+    artist=m>0?m+' min left':'Session ending';
+  }else if(on.length>0){
+    const names=on.map(id=>{const c=COLORS.find(x=>x[0]===id);return c?c[1]:LABEL[id]||id});
+    title=names.slice(0,3).join(', ')+(names.length>3?' +'+(names.length-3):'');
+    artist=playing?'Playing':'Paused';
+  }
+  try{
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title,artist,album:'Auralis',
+      artwork:[
+        {src:'icon-512.png',sizes:'512x512',type:'image/png'},
+        {src:'icon-192.png',sizes:'192x192',type:'image/png'}
+      ]
+    });
+  }catch(e){}
+}
 function play(){
   init();clearTimeout(fadeT);clearTimeout(pvT);fading=false;const t0=ac.currentTime,fi=+$('fin').value||0;master.gain.cancelScheduledValues(t0);if(fi>0){master.gain.setValueAtTime(0,t0);master.gain.linearRampToValueAtTime(1,t0+fi)}else master.gain.value=1;
+  if(ac.state==='suspended')ac.resume().catch(()=>{});
   ac.resume();$('out').play().catch(()=>{});playing=true;if(med.on)med.t0=Date.now();
+  if('mediaSession'in navigator)navigator.mediaSession.playbackState='playing';
+  updateMediaSession();
   if(remMs<=0)remMs=mins()*60000;endAt=Date.now()+remMs;
   $('play').innerHTML=PAUSE_SVG;$('play').setAttribute('aria-label','Pause');setTimeout(boom,1200);setTimeout(()=>eff('bowl')>0&&ring('bowl',nodes.bowl,opt.bowl),1500);show();
 }
 function pause(){
   if(!ac)return;if(med.on&&playing)med.el+=Date.now()-med.t0;if(playing&&!fading)remMs=Math.max(0,endAt-Date.now());
   clearTimeout(fadeT);fading=false;playing=false;ac.suspend();$('out').pause();
+  if('mediaSession'in navigator)navigator.mediaSession.playbackState='paused';
+  updateMediaSession();
   $('play').innerHTML=PLAY_SVG;$('play').setAttribute('aria-label','Play');show();
 }
 $('play').onclick=()=>{if(playing)pause();else if(!ALL.some(isOn)&&!med.on)$('st1').textContent='Pick a sound first';else play()};
@@ -468,16 +583,26 @@ function show(){
   document.querySelectorAll('#tchips .pre').forEach(b=>b.classList.toggle('on',+b.dataset.m===mins()));
 }
 setInterval(()=>{
-  if(med.on&&playing){const e=medEl();while(med.mi<med.mids.length&&e>=med.mids[med.mi]){ring($('bm').value,vgain('i'));med.mi++}
-    if(e>=med.D){ring($('bf').value,vgain('f'));medEnd();startFade(12)}}
+  if(med.on&&playing){const e=medEl();while(med.mi<med.mids.length&&e>=med.mids[med.mi]){ring($('bm').value,vgain('i'));const hi=$('mhi').value;if(hi&&hi!=='off')triggerHaptic(hi);med.mi++}
+    if(e>=med.D){ring($('bf').value,vgain('f'));triggerHaptic('session_end');medEnd();startFade(12)}}
   if(playing&&!fading&&mins()>0&&endAt-Date.now()<=0)startFade();show();keepLast()},500);show();
 // ---- remember every setting ----
-const MEDIDS=['mdur','mint','bgm','bcs','bs','bm','bf','bci','bco','btech','bi','bh1','bo','bh2'];
+const MEDIDS=['mdur','mint','mhi','bgh','bcs','bs','bm','bf','bci','bco','btech','bi','bh1','bo','bh2'];
 const SETT=['tmin','fade','funit','fin',...MEDIDS];
 function setVal(id,v){const e=$(id);if(e.tagName==='SELECT'&&![...e.options].some(o=>o.value===String(v)))return;e.value=v}
-function saveSettings(){try{const o={lvl,opt,warm,mvol,drift,minc:$('minc').checked,emo};SETT.forEach(id=>o[id]=$(id).value);localStorage.setItem('settings',JSON.stringify(o))}catch(e){}}
+function saveSettings(){try{const o={lvl,opt,warm,mvol,drift,minc:$('minc').checked,emo};SETT.forEach(id=>o[id]=$(id).value);BG_CHECKS.forEach(id=>o[id]=$(id).checked);localStorage.setItem('settings',JSON.stringify(o))}catch(e){}}
 function applyMed(md){
   MEDIDS.forEach(id=>{if(md[id]!=null)setVal(id,md[id])});
+  BG_CHECKS.forEach(id=>{if(md[id]!=null)$(id).checked=!!md[id]});
+  if(md.bg_on==null&&md.bgm!=null){
+    if(md.bgm==='off'){$('bg_on').checked=false}
+    else{
+      $('bg_on').checked=true;
+      $('bg_vis').checked=md.bgm.includes('v')||md.bgm==='all';
+      $('bg_snd').checked=md.bgm.includes('s')||md.bgm==='all'||md.bgm==='b';
+      $('bg_hap').checked=md.bgm.includes('h')||md.bgm==='all';
+    }
+  }
   if(md.vv){Object.assign(vvol,md.vv);for(const [id,k] of [['vs','s'],['vi','i'],['vf','f'],['vc','c']])$(id).value=vvol[k];
     if(cueG)cueG.gain.value=vvol.c*.8;for(const k in vgs)vgs[k].gain.value=vvol[k];try{localStorage.setItem('vvol',JSON.stringify(vvol))}catch(e){}}
   syncCue();saveSettings();
@@ -485,6 +610,16 @@ function applyMed(md){
 function restoreSettings(){
   let o={};try{o=JSON.parse(localStorage.getItem('settings')||'{}')}catch(e){}
   SETT.forEach(id=>{if(o[id]!=null)setVal(id,o[id])});
+  BG_CHECKS.forEach(id=>{if(o[id]!=null)$(id).checked=!!o[id]});
+  if(o.bg_on==null&&o.bgm!=null){
+    if(o.bgm==='off'){$('bg_on').checked=false}
+    else{
+      $('bg_on').checked=true;
+      $('bg_vis').checked=o.bgm.includes('v')||o.bgm==='all';
+      $('bg_snd').checked=o.bgm.includes('s')||o.bgm==='all'||o.bgm==='b';
+      $('bg_hap').checked=o.bgm.includes('h')||o.bgm==='all';
+    }
+  }
   if(o.lvl)for(const id in o.lvl)if(id in lvl)lvl[id]=o.lvl[id];
   if(o.opt)Object.assign(opt,o.opt);
   if(o.warm!=null)setWarm(o.warm);
@@ -496,4 +631,5 @@ function restoreSettings(){
 }
 document.addEventListener('input',saveSettings);document.addEventListener('change',saveSettings);
 restoreSettings();
+preselectLast();
 </script></body></html>
