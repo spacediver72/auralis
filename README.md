@@ -16,9 +16,11 @@ Install Node.js (https://nodejs.org) and, for Android, Android Studio.
 ## After editing www/index.html
 Run `npx cap sync` again, then Run in the IDE.
 
-## Still to do
-- Keep audio playing with the screen off (background audio plugin / foreground service).
-- App icon and splash screen.
+## Features
+- Background audio & lock screen media controls (play/pause from lock screen & notification shade).
+- High-resolution app icons and splash screen.
+- Haptic feedback for meditation intervals and breathing guide.
+- Ambient sounds, noise colors, binaural beats, and custom mixes.
 
 ## Build the APK on GitHub (no Android Studio)
 1. Create a new GitHub repository and upload everything in this folder (including the hidden .github folder).

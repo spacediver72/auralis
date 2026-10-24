@@ -17,6 +17,24 @@ jobs:
           java-version: 21
       - run: npm install
       - run: npx cap add android
+      - name: Generate app icons and splash
+        run: npx @capacitor/assets generate --android --assetPath assets
+      - name: Configure background audio and media permissions
+        run: |
+          node -e "
+            const fs = require('fs');
+            const manifestPath = 'android/app/src/main/AndroidManifest.xml';
+            let xml = fs.readFileSync(manifestPath, 'utf8');
+            const perms = [
+              '<uses-permission android:name=\"android.permission.WAKE_LOCK\" />',
+              '<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\" />',
+              '<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK\" />'
+            ].filter(p => !xml.includes(p)).join('\n    ');
+            if (perms) {
+              xml = xml.replace('<application', perms + '\n    <application');
+              fs.writeFileSync(manifestPath, xml);
+            }
+          "
       - run: npx cap sync android
       - run: ./gradlew assembleDebug
         working-directory: android

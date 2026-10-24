@@ -1,6 +1,8 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f1424">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Auralis</title>
 <style>
 :root{color-scheme:dark;--bg:#0f1424;--line:#2a3354;--tx:#ebe8f4;--mu:#8e93ad;--ac:#f2b66d}
@@ -520,6 +522,15 @@ $('bshow').onclick=()=>{breathVis=true;$('breath').hidden=false;drawPhase();if(o
 const PLAY_SVG='<svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><path d="M8.5 5.5v13l10-6.5z" transform="translate(-1.1 0)"/></svg>',PAUSE_SVG='<svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5.5" width="3.8" height="13" rx="1"/><rect x="13.7" y="5.5" width="3.8" height="13" rx="1"/></svg>';
 const mins=()=>+$('tmin').value||0;
 function setupMediaSession(){
+  try{
+    const CMS=window.Capacitor?.Plugins?.MediaSession;
+    if(CMS){
+      CMS.setActionHandler({action:'play'},()=>{if(!ALL.some(isOn)&&!med.on)return;play()});
+      CMS.setActionHandler({action:'pause'},()=>{pause()});
+      CMS.setActionHandler({action:'stop'},()=>{pause()});
+      CMS.setActionHandler({action:'playpause'},()=>{if(playing)pause();else play()});
+    }
+  }catch(e){}
   if(!('mediaSession'in navigator))return;
   try{
     navigator.mediaSession.setActionHandler('play',()=>{if(!ALL.some(isOn)&&!med.on)return;play()});
@@ -528,7 +539,6 @@ function setupMediaSession(){
   }catch(e){}
 }
 function updateMediaSession(){
-  if(!('mediaSession'in navigator))return;
   const on=ALL.filter(isOn);
   let title='Auralis',artist='Soundscapes';
   if(med.on){
@@ -540,20 +550,28 @@ function updateMediaSession(){
     title=names.slice(0,3).join(', ')+(names.length>3?' +'+(names.length-3):'');
     artist=playing?'Playing':'Paused';
   }
+  const artUrl=new URL('icon-512.png',window.location.href).href;
+  const artUrl192=new URL('icon-192.png',window.location.href).href;
+  const artwork=[{src:artUrl,sizes:'512x512',type:'image/png'},{src:artUrl192,sizes:'192x192',type:'image/png'}];
   try{
-    navigator.mediaSession.metadata=new MediaMetadata({
-      title,artist,album:'Auralis',
-      artwork:[
-        {src:'icon-512.png',sizes:'512x512',type:'image/png'},
-        {src:'icon-192.png',sizes:'192x192',type:'image/png'}
-      ]
-    });
+    const CMS=window.Capacitor?.Plugins?.MediaSession;
+    if(CMS){
+      CMS.setMetadata({title,artist,album:'Auralis',artwork});
+      CMS.setPlaybackState({playbackState:playing?'playing':'paused'});
+    }
   }catch(e){}
+  if('mediaSession'in navigator){
+    try{
+      navigator.mediaSession.metadata=new MediaMetadata({title,artist,album:'Auralis',artwork});
+      navigator.mediaSession.playbackState=playing?'playing':'paused';
+    }catch(e){}
+  }
 }
 function play(){
   init();clearTimeout(fadeT);clearTimeout(pvT);fading=false;const t0=ac.currentTime,fi=+$('fin').value||0;master.gain.cancelScheduledValues(t0);if(fi>0){master.gain.setValueAtTime(0,t0);master.gain.linearRampToValueAtTime(1,t0+fi)}else master.gain.value=1;
   if(ac.state==='suspended')ac.resume().catch(()=>{});
   ac.resume();$('out').play().catch(()=>{});playing=true;if(med.on)med.t0=Date.now();
+  try{window.Capacitor?.Plugins?.MediaSession?.setPlaybackState({playbackState:'playing'})}catch(e){}
   if('mediaSession'in navigator)navigator.mediaSession.playbackState='playing';
   updateMediaSession();
   if(remMs<=0)remMs=mins()*60000;endAt=Date.now()+remMs;
@@ -562,6 +580,7 @@ function play(){
 function pause(){
   if(!ac)return;if(med.on&&playing)med.el+=Date.now()-med.t0;if(playing&&!fading)remMs=Math.max(0,endAt-Date.now());
   clearTimeout(fadeT);fading=false;playing=false;ac.suspend();$('out').pause();
+  try{window.Capacitor?.Plugins?.MediaSession?.setPlaybackState({playbackState:'paused'})}catch(e){}
   if('mediaSession'in navigator)navigator.mediaSession.playbackState='paused';
   updateMediaSession();
   $('play').innerHTML=PLAY_SVG;$('play').setAttribute('aria-label','Play');show();
@@ -632,4 +651,5 @@ function restoreSettings(){
 document.addEventListener('input',saveSettings);document.addEventListener('change',saveSettings);
 restoreSettings();
 preselectLast();
+setupMediaSession();
 </script></body></html>
